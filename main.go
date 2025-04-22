@@ -46,16 +46,16 @@ func main() {
 	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Logger.Info("Shutdown Server ...")
+	sg := <-quit
+	log.Logger.Info("gracefully stopping server...", zap.String("signal", sg.String()))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Logger.Fatal("Server forced to shutdown:", zap.Error(err))
 	}
-
-	log.Logger.Info("Server exiting")
+	log.Logger.Info("stopped server")
 }
 
 func setupRouter() *gin.Engine {
