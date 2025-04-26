@@ -1,11 +1,13 @@
 package routers
 
 import (
-	"go_rest_api_template_with_gin/packages/env"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	v1 "go_rest_api_template_with_gin/interfaces/handler/v1"
+	"go_rest_api_template_with_gin/packages/env"
 )
 
 var Engin *gin.Engine
@@ -18,6 +20,13 @@ type Engine struct {
 func (e *Engine) SetBase() {
 	// catch unexpected panic & return 500 error
 	e.Engine.Use(gin.Recovery())
+}
+
+// SetRouter setting routing infomation
+func (e *Engine) SetRouter(v1 v1.AppHandler) {
+	apiv1 := e.Engine.Group("/v1")
+
+	apiv1.GET("hoge")
 }
 
 // SetCORS cors infomation

@@ -24,5 +24,8 @@ func NewRegistry() Registry {
 }
 
 func (r registry) Register() routers.Engine {
+	r.engin.SetBase()
+	r.engin.SetCORS()
+	// r.engin.SetRouter(r.container.GetAppHandler)
 	return r.engin
 }
