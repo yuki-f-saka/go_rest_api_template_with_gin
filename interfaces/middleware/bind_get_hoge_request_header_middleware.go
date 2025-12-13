@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"go_rest_api_template_with_gin/constant"
-	"go_rest_api_template_with_gin/domain/valueobject/request"
 	v1 "go_rest_api_template_with_gin/interfaces/handler/v1"
+	"go_rest_api_template_with_gin/interfaces/handler/v1/request"
 
 	"github.com/gin-gonic/gin"
 )
