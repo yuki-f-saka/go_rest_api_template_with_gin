@@ -31,6 +31,9 @@ func (e *Engine) SetBase() {
 func (e *Engine) SetRouter(v1 v1.AppHandler) {
 	apiv1 := e.Engine.Group("/v1")
 
+	// ユーザー作成
+	apiv1.POST("/user", v1.PostUser)
+
 	apiv1.GET("/hoge",
 		middleware.BindGetHogeRequestHeader())
 }
