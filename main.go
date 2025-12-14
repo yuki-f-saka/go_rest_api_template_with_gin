@@ -15,6 +15,7 @@ import (
 
 	"go_rest_api_template_with_gin/packages/env"
 	"go_rest_api_template_with_gin/packages/log"
+	"go_rest_api_template_with_gin/registry"
 )
 
 var version string
@@ -63,9 +64,10 @@ func setupRouter() *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
+	// DI注入
+	reg := registry.NewRegistry()
+	engine := reg.Register()
+	router := engine.Engine
 
 	// Health Check
 	router.GET("/health", func(c *gin.Context) {

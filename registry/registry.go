@@ -5,6 +5,9 @@ import (
 	"go_rest_api_template_with_gin/routers"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+
+	"go_rest_api_template_with_gin/packages/log"
 )
 
 type Registry interface {
@@ -29,6 +32,13 @@ func NewRegistry() Registry {
 func (r registry) Register() routers.Engine {
 	r.engin.SetBase()
 	r.engin.SetCORS()
-	r.engin.SetRouter(r.container.GetAppHandler)
+
+	// ハンドラーの初期化
+	appHandler, err := r.container.NewAppHandler()
+	if err != nil {
+		log.Logger.Fatal("failed to initialize app handler", zap.Error(err))
+	}
+
+	r.engin.SetRouter(*appHandler)
 	return r.engin
 }

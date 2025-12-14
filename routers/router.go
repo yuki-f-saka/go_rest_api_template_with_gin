@@ -21,6 +21,7 @@ type Engine struct {
 func (e *Engine) SetBase() {
 	// catch unexpected panic & return 500 error
 	e.Engine.Use(gin.Recovery())
+	e.Engine.Use(gin.Logger())
 
 	// ヘルスチェック
 	e.Engine.GET("/v1/status", HealthCheck)

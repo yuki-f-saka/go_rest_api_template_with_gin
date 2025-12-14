@@ -16,6 +16,13 @@ type Config struct {
 	AccessAllowOrigin    string `envconfig:"ACCESS_ALLOW_ORIGIN"`
 	AccessAllowOriginWeb string `envconfig:"ACCESS_ALLOW_ORIGIN_WEB"`
 	AccessAllowOriginCms string `envconfig:"ACCESS_ALLOW_ORIGIN_CMS"`
+
+	DBDriver   string `envconfig:"DB_DRIVER" default:"mysql"`
+	DBHost     string `envconfig:"DB_HOST" default:"localhost"`
+	DBPort     string `envconfig:"DB_PORT" default:"3306"`
+	DBUser     string `envconfig:"DB_USER" default:"root"`
+	DBPassword string `envconfig:"DB_PASSWORD" default:""`
+	DBName     string `envconfig:"DB_NAME" default:"app"`
 }
 
 func SetupEnv() error {
