@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +17,7 @@ import (
 	"go_rest_api_template_with_gin/packages/env"
 	"go_rest_api_template_with_gin/packages/log"
 	"go_rest_api_template_with_gin/registry"
+	"go_rest_api_template_with_gin/server"
 )
 
 var version string
@@ -37,24 +39,36 @@ func main() {
 		Handler: router,
 	}
 
-	// graceful restart & shutdown
+	// graceful shutdown orchestrator
+	// 合計タイムアウト 20s: http-shutdown 15s
+	orch := server.NewShutdownOrchestrator(20 * time.Second)
+	orch.Register("http-shutdown", 15*time.Second, func(ctx context.Context) error {
+		return srv.Shutdown(ctx)
+	})
+
+	// SIGINT・SIGTERM を受信するチャネルを登録する
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigCh)
+
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Logger.Fatal("failed to serve server", zap.Error(err))
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	sg := <-quit
-	log.Logger.Info("gracefully stopping server...", zap.String("signal", sg.String()))
+	sig := <-sigCh
+	log.Logger.Info("gracefully stopping server...", zap.String("signal", sig.String()))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// 2回目のシグナルで強制終了
+	go func() {
+		sig := <-sigCh
+		log.Logger.Warn("forced exit", zap.String("signal", sig.String()))
+		os.Exit(1)
+	}()
 
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Logger.Fatal("Server forced to shutdown:", zap.Error(err))
+	if err := orch.Shutdown(slog.Default()); err != nil {
+		log.Logger.Error("shutdown error", zap.Error(err))
 	}
 	log.Logger.Info("stopped server")
 }
